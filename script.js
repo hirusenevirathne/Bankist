@@ -74,3 +74,42 @@ const currencies = new Map([
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /////////////////////////////////////////////////
+
+let arr = ['a', 'b', 'c', 'd', 'e'];
+
+console.log('Slice method');
+// SLICE -  create a copy from array
+console.log(arr.slice(2)); //this return a array
+console.log(arr.slice(2, 4));
+console.log(arr.slice(-2));
+console.log(arr.slice(-1));
+console.log(arr.slice(1, -2));
+console.log(arr.slice()); //we can use slice to create a shallow copy of the array
+
+console.log('Splice method');
+// SPLICE -  remove items from array and create a new
+//change original array and get it to new array
+//console.log(arr.splice(2)); // ['c', 'd', 'e']
+console.log(arr);
+arr.splice(-1); //remove last elemnt in the array
+console.log(arr);
+arr.splice(1, 2);
+console.log(arr);
+
+console.log('Reverse method');
+// REVERSE - this reverse the Original array (mutated original array)
+const arr2 = ['j', 'i', 'h', 'g', 'f'];
+console.log(arr2);
+console.log(arr2.reverse());
+console.log(arr2);
+
+console.log('Concat method');
+// CONCAT - attached 2 Arrays
+const letters = arr.concat(arr2);
+console.log(letters);
+console.log([...arr, ...arr2]); //same with another way
+
+console.log('Join method');
+// JOIN - join and retun as a string
+console.log(letters.join('-'));
+console.log(letters);
