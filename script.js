@@ -71,7 +71,7 @@ const displayMovements = function (movements) {
     const html = `
         <div class="movements__row">
           <div class="movements__type movements__type--${type}">${i+1} ${type}</div>
-          <div class="movements__value">${mov}</div>
+          <div class="movements__value">${mov} EUR</div>
         </div>
         `;
 
@@ -80,6 +80,25 @@ const displayMovements = function (movements) {
 };
 displayMovements(account1.movements)
 
+const calcDisplayBalance = function (movements) {
+  const balance = movements.reduce((acc,mov)=>acc+mov, 0);
+  labelBalance.textContent = `${balance} EUR`;
+};
+calcDisplayBalance(account1.movements); //call the show balance method
+
+const calcDisplaySummery = function (movements) {
+  const income = movements.filter(mov => mov>0).reduce((acc,mov ) => acc+mov, 0); //calculate the income
+  labelSumIn.textContent = `${income} EUR`;
+
+  const outcome = movements.filter(mov => mov<0).reduce((acc,mov) => acc+mov, 0); //calculate the out going
+  labelSumOut.textContent = `${Math.abs(outcome)} EUR`
+
+  const interest = movements.filter(mov => mov>0).map(deposit => (deposit * 1.2)/100).filter((int,i,arr) => 
+  {return int >=1;}).reduce((acc,int) => acc+int,0); //calculate the interest and remove all interest less than 1 EUR
+  labelSumInterest.textContent = `${interest} EUR`;
+};
+calcDisplaySummery(account1.movements); //call the show summery method
+
 const createUsernames = function (accs) {
   accs.forEach(function (acc) {
     acc.username = acc.owner.toLowerCase().split(' ').map(name => name[0]).join('');
@@ -87,7 +106,9 @@ const createUsernames = function (accs) {
 };
 
 createUsernames(accounts);
-console.log(accounts);
+
+
+
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
@@ -102,4 +123,12 @@ const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /////////////////////////////////////////////////
 
+/*
+const max = movements.reduce((acc,mov) => {
+  if (acc>mov) {
+    return acc;}
+    else {return mov;}
+  }, movements[0]);
 
+  console.log(max);
+  */
