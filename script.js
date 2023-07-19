@@ -168,6 +168,25 @@ btnTransfer.addEventListener('click',function (e) {
 
 });
 
+//remove user method
+btnClose.addEventListener('click',function (e) {
+  e.preventDefault();
+
+  if  (inputCloseUsername.value === currentAccount.username && Number(inputClosePin.value) === currentAccount.pin){
+
+    const index = accounts.findIndex(acc => acc.username === currentAccount.username);//get correct account index
+    
+    //Delete account
+    accounts.splice(index,1);
+
+    //Hide UI even pin is worng UI will be hidden
+    containerApp.style.opacity = 0; //Hide the UI
+      
+    }
+    inputCloseUsername.value = inputClosePin.value = '';//clear the input field
+
+  });
+
 
 
 /////////////////////////////////////////////////
