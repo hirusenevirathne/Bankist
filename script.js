@@ -62,9 +62,13 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 //Display movement method
-const displayMovements = function (movements) {
+//if sort buttton press sort the movements
+const displayMovements = function (movements, sort = false) {
   containerMovements.innerHTML = ""; //clear the older movements
-  movements.forEach(function (mov, i) {
+
+  const movs = sort ? movements.slice().sort((a,b) => a-b) : movements; //sort the movements if sort is true
+  
+  movs.forEach(function (mov, i) {
 
     const type = mov >0 ? `deposit` : `withdrawal`
 
@@ -78,7 +82,8 @@ const displayMovements = function (movements) {
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
 };
-//displayMovements(account1.movements)
+
+
 
 const calcDisplayBalance = function (acc) {
   acc.balance = acc.movements.reduce((acc,mov)=>acc+mov, 0);//add the balance to the account object
@@ -164,9 +169,25 @@ btnTransfer.addEventListener('click',function (e) {
 
     //Update UI 
     updateUI(currentAccount);
+
+    inputLoanAmount.value = ''; //clear the input field
   } 
 
 });
+
+//Request loan method
+btnLoan.addEventListener('click',function (e) {
+  e.preventDefault();
+  const amount = Number(inputLoanAmount.value);//get the loan amount
+  if (amount>0 && currentAccount.movements.some(mov => mov >= amount*0.1)) {//chek if the loan is greater than 10% of any deposit
+    //Add movement
+    currentAccount.movements.push(amount);
+
+    //Update UI
+    updateUI(currentAccount);
+  }
+});
+
 
 //remove user method
 btnClose.addEventListener('click',function (e) {
@@ -187,39 +208,11 @@ btnClose.addEventListener('click',function (e) {
 
   });
 
-
-
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
-// LECTURES
-/*
-const currencies = new Map([
-  ['USD', 'United States dollar'],
-  ['EUR', 'Euro'],
-  ['GBP', 'Pound sterling'],
-]);
-
-const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
-
-const firstwithdrawals = movements.find(mov => mov<0);
-console.log(movements);
-console.log(firstwithdrawals);
-
-const account = accounts.find(acc => acc.owner === 'Jessica Davis');
-console.log(account);
-
-const max = movements.reduce((acc,mov) => {
-  if (acc>mov) {
-    return acc;}
-    else {return mov;}
-  }, movements[0]);
-
-  console.log(max);
-  */
-
-
-
-
+let sorted = false;
+btnSort.addEventListener('click',function (e) {
+  e.preventDefault();
+  displayMovements(currentAccount.movements, !sorted);
+  sorted = !sorted;
+});
 
 /////////////////////////////////////////////////
-
