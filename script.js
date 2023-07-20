@@ -62,9 +62,13 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 //Display movement method
-const displayMovements = function (movements) {
+//if sort buttton press sort the movements
+const displayMovements = function (movements, sort = false) {
   containerMovements.innerHTML = ""; //clear the older movements
-  movements.forEach(function (mov, i) {
+
+  const movs = sort ? movements.slice().sort((a,b) => a-b) : movements; //sort the movements if sort is true
+  
+  movs.forEach(function (mov, i) {
 
     const type = mov >0 ? `deposit` : `withdrawal`
 
@@ -78,11 +82,13 @@ const displayMovements = function (movements) {
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
 };
-//displayMovements(account1.movements)
 
-const calcDisplayBalance = function (movements) {
-  const balance = movements.reduce((acc,mov)=>acc+mov, 0);
-  labelBalance.textContent = `${balance} EUR`;
+
+
+const calcDisplayBalance = function (acc) {
+  acc.balance = acc.movements.reduce((acc,mov)=>acc+mov, 0);//add the balance to the account object
+  
+  labelBalance.textContent = `${acc.balance} EUR`;
 };
 //calcDisplayBalance(account1.movements); //call the show balance method
 
@@ -107,6 +113,16 @@ const createUsernames = function (accs) {
 
 createUsernames(accounts);
   
+const updateUI = function (acc) { //Update the UI accoding to account u logged in 
+  //Display movements
+  displayMovements(acc.movements);
+
+  //Display balance
+  calcDisplayBalance(acc);
+
+  //Display summery
+  calcDisplaySummery(acc);
+}
 
 
 //Event handeler
@@ -121,7 +137,7 @@ btnLogin.addEventListener('click', function (e) {//add event to the login button
    console.log(currentAccount);
 
    if (currentAccount?.pin === Number(inputLoginPin.value)){//check if the pin is correct if account availbe
-    console.log(`login`);
+    //console.log(`login`);
     //Display UI and welcome message
     labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`; //show welcome message
     containerApp.style.opacity = 100; //show the UI
@@ -130,51 +146,73 @@ btnLogin.addEventListener('click', function (e) {//add event to the login button
     inputLoginUsername.value = inputLoginPin.value = ''; 
     inputLoginPin.blur(); //remove focus from the input field
 
-    //Display movements
-    displayMovements(currentAccount.movements);
-
-    //Display balance
-    calcDisplayBalance(currentAccount.movements);
-
-    //Display summery
-    calcDisplaySummery(currentAccount);
+    updateUI(currentAccount); //update the UI
 
    }
   
 });
 
+//Money Tranfer Method
+btnTransfer.addEventListener('click',function (e) {
+  e.preventDefault();
+  const amount = Number (inputTransferAmount.value);
+  const receiverAcc = accounts.find(acc => acc.username === inputTransferTo.value);
+  //const senderAcc = currentAccount;
+  
+  inputTransferAmount.value = inputTransferTo.value = ''; //clear the input field
+  
+  if (amount > 0 && receiverAcc && currentAccount.balance >= amount && receiverAcc?.username !== currentAccount.username){
+
+    //Doing the transfer
+    currentAccount.movements.push(-amount);
+    receiverAcc.movements.push(amount);
+
+    //Update UI 
+    updateUI(currentAccount);
+
+    inputLoanAmount.value = ''; //clear the input field
+  } 
+
+});
+
+//Request loan method
+btnLoan.addEventListener('click',function (e) {
+  e.preventDefault();
+  const amount = Number(inputLoanAmount.value);//get the loan amount
+  if (amount>0 && currentAccount.movements.some(mov => mov >= amount*0.1)) {//chek if the loan is greater than 10% of any deposit
+    //Add movement
+    currentAccount.movements.push(amount);
+
+    //Update UI
+    updateUI(currentAccount);
+  }
+});
+
+
+//remove user method
+btnClose.addEventListener('click',function (e) {
+  e.preventDefault();
+
+  if  (inputCloseUsername.value === currentAccount.username && Number(inputClosePin.value) === currentAccount.pin){
+
+    const index = accounts.findIndex(acc => acc.username === currentAccount.username);//get correct account index
+    
+    //Delete account
+    accounts.splice(index,1);
+
+    //Hide UI even pin is worng UI will be hidden
+    containerApp.style.opacity = 0; //Hide the UI
+      
+    }
+    inputCloseUsername.value = inputClosePin.value = '';//clear the input field
+
+  });
+
+let sorted = false;
+btnSort.addEventListener('click',function (e) {
+  e.preventDefault();
+  displayMovements(currentAccount.movements, !sorted);
+  sorted = !sorted;
+});
 
 /////////////////////////////////////////////////
-/////////////////////////////////////////////////
-// LECTURES
-/*
-const currencies = new Map([
-  ['USD', 'United States dollar'],
-  ['EUR', 'Euro'],
-  ['GBP', 'Pound sterling'],
-]);
-
-const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
-
-const firstwithdrawals = movements.find(mov => mov<0);
-console.log(movements);
-console.log(firstwithdrawals);
-
-const account = accounts.find(acc => acc.owner === 'Jessica Davis');
-console.log(account);
-
-const max = movements.reduce((acc,mov) => {
-  if (acc>mov) {
-    return acc;}
-    else {return mov;}
-  }, movements[0]);
-
-  console.log(max);
-  */
-
-
-
-
-
-/////////////////////////////////////////////////
-
