@@ -108,22 +108,31 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
+/////////////////////////////////////////////////////////////////////////////////////
+//Funtions
+
 //Display movement method
 //if sort buttton press sort the movements
-const displayMovements = function (movements, sort = false) {
+const displayMovements = function (acc, sort = false) {
   containerMovements.innerHTML = ""; //clear the older movements
 
-  const movs = sort ? movements.slice().sort((a,b) => a-b) : movements; //sort the movements if sort is true
+  const movs = sort ? acc.movements.slice().sort((a,b) => a-b) : acc.movements; //sort the movements if sort is true
   
   movs.forEach(function (mov, i) {
 
-    const type = mov >0 ? `deposit` : `withdrawal`
+    const type = mov >0 ? `deposit` : `withdrawal` //check the type of the movement
+    const date = new Date(acc.movementsDates[i]); //get the date from the movementsDates array
+    const day = `${date.getDate()}`.padStart(2,0); //get the day
+    const month = `${date.getMonth()+1}`.padStart(2,0); //get the month
+    const year = date.getFullYear(); //get the year
+    const displayDate = `${day}/${month}/${year}`; //display the date in dd/mm/yyyy format
 
     const html = `
         <div class="movements__row">
           <div class="movements__type movements__type--${type}">${i+1} ${type}</div>
+          <div class="movements__date">${displayDate}</div>
           <div class="movements__value">${mov.toFixed(2)} EUR</div>
-        </div>
+        </div> 
         `;
 
     containerMovements.insertAdjacentHTML('afterbegin', html);
@@ -162,18 +171,27 @@ createUsernames(accounts);
   
 const updateUI = function (acc) { //Update the UI accoding to account u logged in 
   //Display movements
-  displayMovements(acc.movements);
+  displayMovements(acc);
 
   //Display balance
   calcDisplayBalance(acc);
 
   //Display summery
   calcDisplaySummery(acc);
-}
-
+};
 
 //Event handeler
 let currentAccount; //to store the current account we logged in
+
+//Fake logging -------------------------------------
+
+currentAccount = account1;
+updateUI(currentAccount);
+containerApp.style.opacity = 100; //show the UI
+
+//fake login end  ---------------------------------
+
+
 
 btnLogin.addEventListener('click', function (e) {//add event to the login button
   e.preventDefault();//prevent form from submitting
@@ -188,6 +206,15 @@ btnLogin.addEventListener('click', function (e) {//add event to the login button
     //Display UI and welcome message
     labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`; //show welcome message
     containerApp.style.opacity = 100; //show the UI
+
+    //Show current account Loged Time
+    const now = new Date();
+    const day = `${now.getDate()}`.padStart(2,0);
+    const month = `${now.getMonth()+1}`.padStart(2,0);
+    const year = now.getFullYear();
+    const hour = `${now.getHours()}`.padStart(2,0);
+    const min = `${now.getMinutes()}`.padStart(2,0);
+    labelDate.textContent = `${day}/${month}/${year}, ${hour}:${min}`;
 
     //Clear input fields
     inputLoginUsername.value = inputLoginPin.value = ''; 
@@ -214,6 +241,10 @@ btnTransfer.addEventListener('click',function (e) {
     currentAccount.movements.push(-amount);
     receiverAcc.movements.push(amount);
 
+    //add transfer date
+    currentAccount.movementsDates.push(new Date().toISOString());
+    receiverAcc.movementsDates.push(new Date().toISOString()); 
+
     //Update UI 
     updateUI(currentAccount);
 
@@ -229,6 +260,9 @@ btnLoan.addEventListener('click',function (e) {
   if (amount>0 && currentAccount.movements.some(mov => mov >= amount*0.1)) {//chek if the loan is greater than 10% of any deposit
     //Add movement
     currentAccount.movements.push(amount);
+
+    //add loan date
+    currentAccount.movementsDates.push(new Date().toISOString());
 
     //Update UI
     updateUI(currentAccount);
