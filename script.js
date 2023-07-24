@@ -121,16 +121,16 @@ const formatMovementDate = function (date, locale) {
     if (daysPassed === 0) return `Today`; //if days passed is 0 return today
     if (daysPassed === 1) return `Yesterday`; //if days passed is 1 return yesterday
     if (daysPassed <= 7) return `${daysPassed} days ago`; //if days passed is less than 7 return days ago
-    /*
-    else {
-      const day = `${date.getDate()}`.padStart(2,0); //get the day
-      const month = `${date.getMonth()+1}`.padStart(2,0); //get the month
-      const year = date.getFullYear(); //get the year
-      return `${day}/${month}/${year}`; //return the date in dd/mm/yyyy format
-    };
-    */
-   return new Intl.DateTimeFormat(locale).format(date); //return the date in the locale format
+    return new Intl.DateTimeFormat(locale).format(date); //return the date in the locale format
 };
+
+//formatting currency
+const formatCur = function (value, locale, currency) {
+  return new Intl.NumberFormat(locale, { //format the movement in locale format
+    style: 'currency',
+    currency: currency,
+  }).format(value);//call format method
+}
 
 //Display movement method
 //if sort buttton press sort the movements
@@ -146,11 +146,14 @@ const displayMovements = function (acc, sort = false) {
     const date = new Date(acc.movementsDates[i]); //get the date from the movementsDates array
     const displayDate = formatMovementDate(date, acc.locale); //display the date in dd/mm/yyyy format
 
+    const formattedMov = formatCur(mov, acc.locale, acc.currency); //format the currency in locale format
+    
+
     const html = `
         <div class="movements__row">
           <div class="movements__type movements__type--${type}">${i+1} ${type}</div>
           <div class="movements__date">${displayDate}</div>
-          <div class="movements__value">${mov.toFixed(2)} EUR</div>
+          <div class="movements__value">${formattedMov} EUR</div>
         </div> 
         `;
 
@@ -163,20 +166,21 @@ const displayMovements = function (acc, sort = false) {
 const calcDisplayBalance = function (acc) {
   acc.balance = acc.movements.reduce((acc,mov)=>acc+mov, 0);//add the balance to the account object
   
-  labelBalance.textContent = `${acc.balance.toFixed(2)} EUR`;
+  labelBalance.textContent = formatCur(acc.balance, acc.locale, acc.currency);
 };
 //calcDisplayBalance(account1.movements); //call the show balance method
 
 const calcDisplaySummery = function (acc) {
   const income = acc.movements.filter(mov => mov>0).reduce((acc,mov ) => acc+mov, 0); //calculate the income
-  labelSumIn.textContent = `${income.toFixed(2)} EUR`;
+  labelSumIn.textContent = formatCur(income, acc.locale, acc.currency);
 
   const outcome = acc.movements.filter(mov => mov<0).reduce((acc,mov) => acc+mov, 0); //calculate the out going
-  labelSumOut.textContent = `${Math.abs(outcome).toFixed(2)} EUR`
+  labelSumOut.textContent = formatCur(Math.abs(outcome), acc.locale, acc.currency);
+ 
 
   const interest = acc.movements.filter(mov => mov>0).map(deposit => (deposit * acc.interestRate)/100).filter((int,i,arr) => 
   {return int >=1;}).reduce((acc,int) => acc+int,0); //calculate the interest and remove all interest less than 1 EUR
-  labelSumInterest.textContent = `${interest.toFixed(2)} EUR`;
+  labelSumInterest.textContent = formatCur(interest, acc.locale, acc.currency);
 };
 //calcDisplaySummery(account1.movements); //call the show summery method
 
@@ -318,3 +322,14 @@ btnSort.addEventListener('click',function (e) {
   sorted = !sorted;
 });
 
+
+
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+
+const num = 3884764.23;
+
+console.log(`US: `,new Intl.NumberFormat('en-US').format(num));
+console.log(`Germany: `,new Intl.NumberFormat('de-DE').format(num));
+console.log(`Syria: `,new Intl.NumberFormat('ar-SY').format(num));
+console.log(navigator.language, new Intl.NumberFormat(navigator.language).format(num));
