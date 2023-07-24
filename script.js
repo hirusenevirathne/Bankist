@@ -51,10 +51,10 @@ const account1 = {
     '2019-12-23T07:42:02.383Z',
     '2020-01-28T09:15:04.904Z',
     '2020-04-01T10:17:24.185Z',
-    '2020-05-08T14:11:59.604Z',
-    '2020-05-27T17:01:17.194Z',
-    '2020-07-11T23:36:17.929Z',
-    '2020-07-12T10:51:36.790Z',
+    '2023-07-24T14:11:59.604Z',
+    '2023-07-23T17:01:17.194Z',
+    '2023-07-22T23:36:17.929Z',
+    '2023-07-21T10:51:36.790Z',
   ],
   currency: 'EUR',
   locale: 'pt-PT', // de-DE
@@ -111,6 +111,27 @@ const inputClosePin = document.querySelector('.form__input--pin');
 /////////////////////////////////////////////////////////////////////////////////////
 //Funtions
 
+//create a one format for all the dates
+const formatMovementDate = function (date, locale) {
+    const calcDaysPassed = (date1, date2) => Math.round(Math.abs(date2 - date1) / (1000*60*60*24)); //calculate the days passed between two dates
+    
+    const daysPassed = calcDaysPassed(new Date(), date); //get the days passed from the date to today
+    //console.log(daysPassed);
+
+    if (daysPassed === 0) return `Today`; //if days passed is 0 return today
+    if (daysPassed === 1) return `Yesterday`; //if days passed is 1 return yesterday
+    if (daysPassed <= 7) return `${daysPassed} days ago`; //if days passed is less than 7 return days ago
+    /*
+    else {
+      const day = `${date.getDate()}`.padStart(2,0); //get the day
+      const month = `${date.getMonth()+1}`.padStart(2,0); //get the month
+      const year = date.getFullYear(); //get the year
+      return `${day}/${month}/${year}`; //return the date in dd/mm/yyyy format
+    };
+    */
+   return new Intl.DateTimeFormat(locale).format(date); //return the date in the locale format
+};
+
 //Display movement method
 //if sort buttton press sort the movements
 const displayMovements = function (acc, sort = false) {
@@ -121,11 +142,9 @@ const displayMovements = function (acc, sort = false) {
   movs.forEach(function (mov, i) {
 
     const type = mov >0 ? `deposit` : `withdrawal` //check the type of the movement
+
     const date = new Date(acc.movementsDates[i]); //get the date from the movementsDates array
-    const day = `${date.getDate()}`.padStart(2,0); //get the day
-    const month = `${date.getMonth()+1}`.padStart(2,0); //get the month
-    const year = date.getFullYear(); //get the year
-    const displayDate = `${day}/${month}/${year}`; //display the date in dd/mm/yyyy format
+    const displayDate = formatMovementDate(date, acc.locale); //display the date in dd/mm/yyyy format
 
     const html = `
         <div class="movements__row">
@@ -199,7 +218,7 @@ btnLogin.addEventListener('click', function (e) {//add event to the login button
   currentAccount = accounts.find(acc => acc.username === inputLoginUsername.value); 
   //find the account that match the username in the input field and store it in currentAccount
    
-   console.log(currentAccount);
+   //console.log(currentAccount);
 
    if (currentAccount?.pin === Number(inputLoginPin.value)){//check if the pin is correct if account availbe
     //console.log(`login`);
@@ -209,13 +228,16 @@ btnLogin.addEventListener('click', function (e) {//add event to the login button
 
     //Show current account Loged Time
     const now = new Date();
-    const day = `${now.getDate()}`.padStart(2,0);
-    const month = `${now.getMonth()+1}`.padStart(2,0);
-    const year = now.getFullYear();
-    const hour = `${now.getHours()}`.padStart(2,0);
-    const min = `${now.getMinutes()}`.padStart(2,0);
-    labelDate.textContent = `${day}/${month}/${year}, ${hour}:${min}`;
-
+    const options = {
+      hour: 'numeric',
+      minute: 'numeric',
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+      //weekday: 'long',
+    };
+    labelDate.textContent = new Intl.DateTimeFormat(currentAccount.locale, options).format(now);
+    
     //Clear input fields
     inputLoginUsername.value = inputLoginPin.value = ''; 
     inputLoginPin.blur(); //remove focus from the input field
