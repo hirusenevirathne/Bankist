@@ -203,9 +203,36 @@ const updateUI = function (acc) { //Update the UI accoding to account u logged i
   calcDisplaySummery(acc);
 };
 
-//Event handeler
-let currentAccount; //to store the current account we logged in
+const startLogOutTimer = function () {//Calculate and display time, loging time out function
+  
+  const tick = function () {
+  //in each call, print the remaining time to UI
+  labelTimer.textContent = `${String(Math.trunc(time/60)).padStart(2,0)}:${String(time%60).padStart(2,0)}`;
 
+  //when 0 second, stop timer and log out user
+  if (time === 0) {
+    clearInterval(timer);
+    labelWelcome.textContent = `Log in to get started`;
+    containerApp.style.opacity = 0; //Hide the UI
+  }
+    //decrease 1 second
+    time--;
+};
+//set time out to log out after 5 min
+let time = 300;
+
+//call the timer every second
+tick();
+const timer = setInterval(tick, 1000);
+return timer;
+};
+
+
+
+//Event handeler------------------------------------------------------------------
+let currentAccount, timer; //to store the current account we logged in
+
+/*
 //Fake logging -------------------------------------
 
 currentAccount = account1;
@@ -213,7 +240,7 @@ updateUI(currentAccount);
 containerApp.style.opacity = 100; //show the UI
 
 //fake login end  ---------------------------------
-
+*/
 
 
 btnLogin.addEventListener('click', function (e) {//add event to the login button
@@ -246,6 +273,9 @@ btnLogin.addEventListener('click', function (e) {//add event to the login button
     inputLoginUsername.value = inputLoginPin.value = ''; 
     inputLoginPin.blur(); //remove focus from the input field
 
+    if (timer) clearInterval(timer); //clear the timer if there is a timer
+    timer = startLogOutTimer(); //call the log out timer function
+
     updateUI(currentAccount); //update the UI
 
    }
@@ -275,6 +305,10 @@ btnTransfer.addEventListener('click',function (e) {
     updateUI(currentAccount);
 
     inputLoanAmount.value = ''; //clear the input field
+
+    //Reset the timer
+    clearInterval(timer); //clear the timer if there is a timer
+    timer = startLogOutTimer(); //call the log out timer function
   } 
 
 });
@@ -284,6 +318,7 @@ btnLoan.addEventListener('click',function (e) {
   e.preventDefault();
   const amount = Math.floor(inputLoanAmount.value);//get the loan amount
   if (amount>0 && currentAccount.movements.some(mov => mov >= amount*0.1)) {//chek if the loan is greater than 10% of any deposit
+    setTimeout(function () { //add a time out function to add the loan after 2.5 sec
     //Add movement
     currentAccount.movements.push(amount);
 
@@ -292,7 +327,14 @@ btnLoan.addEventListener('click',function (e) {
 
     //Update UI
     updateUI(currentAccount);
+  }, 2500);
   }
+  inputLoanAmount.value = ''; //clear the input field
+
+  //Reset the timer
+  clearInterval(timer); //clear the timer if there is a timer
+  timer = startLogOutTimer(); //call the log out timer function
+  
 });
 
 
@@ -326,10 +368,27 @@ btnSort.addEventListener('click',function (e) {
 
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
-
+/*
 const num = 3884764.23;
 
 console.log(`US: `,new Intl.NumberFormat('en-US').format(num));
 console.log(`Germany: `,new Intl.NumberFormat('de-DE').format(num));
 console.log(`Syria: `,new Intl.NumberFormat('ar-SY').format(num));
 console.log(navigator.language, new Intl.NumberFormat(navigator.language).format(num));
+
+setTimeout(() => console.log(`Here is your money 💵`), 3000);
+console.log('waiting...');
+
+const ingredients = ['olives', 'spinach'];
+const pizzaTimer = setTimeout(
+  (ing1,ing2) => console.log(`Here is your pizza 🍕 with ${ing1} and ${ing2}`), 
+  3000, ...ingredients);
+
+  if (ingredients.includes('spinach')) clearTimeout(pizzaTimer);
+
+  //setInterval
+  setInterval(function () {
+    const now = new Date();
+    console.log(now);
+  }, 3000);
+*/
